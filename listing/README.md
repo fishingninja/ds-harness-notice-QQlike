@@ -5,6 +5,11 @@ DSH 的「插件市场」由社区目录 [awesome-dsh-plugin](https://awesome-ds
 
 所以「让其他人也能看到、下载、使用」的路径是：**向那个目录仓库提一个 PR**。
 
+## 已提交的 PR
+
+**[#12749](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/12749)** —
+只改一个文件，`mergeable: true`。
+
 ## 收录门槛
 
 | 要求 | 状态 |
@@ -14,9 +19,11 @@ DSH 的「插件市场」由社区目录 [awesome-dsh-plugin](https://awesome-ds
 | 真实可用的代码，非占位仓库 | ✅ |
 | 仓库带 `dsh-plugin` topic | ✅ 已设置 |
 | 描述只讲功能、不夸大 | ✅ |
-| 仓库创建满 **1 天** | ⏳ 仓库建于 2026-11-06 15:15 UTC |
+| 仓库创建满 **1 天** | ⏳ 仓库建于 2026-11-06 15:15 UTC，约 2026-11-07 15:15 UTC 达标 |
 
-最后一项由 CI 自动检查，未满 1 天提交会被直接拒绝。等满 1 天再提，不会有任何负面影响。
+年龄这一项由 CI 自动检查。关键在于：**它只会让 PR 暂时变红，不会让 PR 被关掉**。
+目录方的 workflow 每 6 小时自动重跑一次这条检查（`regate.yml`），达标后自己就变绿。
+所以不需要重新提交、不需要空 commit、更不要关掉重开 —— 让 PR 开着就行。
 
 ## 提交方式
 
@@ -26,10 +33,15 @@ DSH 的「插件市场」由社区目录 [awesome-dsh-plugin](https://awesome-ds
 data/plugins/fishingninja__ds-harness-notice-QQlike--packages-dsh-desktop-alerts.yml
 ```
 
-内容就是本目录下的 `catalog-entry.yml`。文件名遵循目录方的 monorepo 子包约定
-（`<owner>__<repo>--<子包路径，斜杠换成连字符>`）。
+内容就是本目录下的 `catalog-entry.yml`（提交时会去掉开头那几行注释）。
+文件名由目录方的 `slugFor()` 从 `url` 推导，规则是
+`<owner>__<repo>--<子包路径，斜杠换成连字符>`。
 
 不要手工改那两个 README —— 它们由 `data/plugins/*.yml` 自动生成。
+
+条目已用目录方自己的 `validateEntries()` 在本地跑过，0 问题；
+CI 侧的 `Entry files live in data/plugins/`、`READMEs match data/plugins`、
+`awesome-lint` 等步骤也已通过。
 
 ## 各字段的依据
 
