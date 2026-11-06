@@ -1,0 +1,15 @@
+# Normalise to LF in the repository. The plugin ships a PowerShell script that
+# is invoked through -EncodedCommand, and its comments are ASCII-only, so the
+# on-disk line ending does not matter to the script itself - but a consistent
+# diff does matter to anyone reviewing a change.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.m4a binary
+*.png binary
+*.ico binary
+*.jpg binary
+
+# The PowerShell helper is read as ASCII by design; keep it out of any
+# text=auto normalisation surprises.
+*.ps1 text eol=lf
