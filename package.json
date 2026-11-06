@@ -1,70 +1,22 @@
 {
-  "name": "dsh-desktop-alerts",
-  "version": "1.1.0",
-  "description": "QQ 风格的 DSH 桌面提醒：会话需要你处理、回复完成或被中断时响一声，并让系统托盘图标像未读消息一样闪动。",
+  "name": "ds-harness-notice-qqlike",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace root for the DSH desktop-alerts plugin.",
   "license": "MIT",
   "author": "fishingninja",
-  "type": "module",
-  "homepage": "https://github.com/fishingninja/ds-harness-notice-QQlike#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
   },
+  "homepage": "https://github.com/fishingninja/ds-harness-notice-QQlike#readme",
   "bugs": {
     "url": "https://github.com/fishingninja/ds-harness-notice-QQlike/issues"
   },
-  "keywords": [
-    "deepseek-harness",
-    "dsh",
-    "dsh-plugin",
-    "dsh-bundle",
-    "desktop",
-    "alerts",
-    "tray",
-    "notification",
-    "sound",
-    "unread",
-    "qq",
-    "桌面提醒",
-    "托盘闪动",
-    "提示音"
+  "packages": [
+    "packages/dsh-desktop-alerts"
   ],
-  "exports": {
-    ".": "./index.js",
-    "./client": "./client.js",
-    "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
-  },
-  "files": [
-    "index.js",
-    "client.js",
-    "cordis.patch.yml",
-    "lib/flash-window.ps1",
-    "lib/alert.m4a",
-    "locale/*.json",
-    "icon.svg",
-    "README.md",
-    "README.en.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=18"
-  },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web",
-      "immediately": true,
-      "inject": [
-        "@deepseek-ai/dsh-client-ui-session"
-      ]
-    },
-    "compatibility": {
-      "dshReleases": {
-        "0.2.1-rc.2": "compatible"
-      }
-    }
+  "scripts": {
+    "check": "node --check packages/dsh-desktop-alerts/index.js"
   }
 }

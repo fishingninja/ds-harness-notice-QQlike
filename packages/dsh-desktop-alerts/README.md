@@ -15,17 +15,29 @@ QQ 风格的 DSH 桌面提醒插件（Windows 桌面端）。
 
 ## 安装
 
-目前通过 Git 安装（尚未发布到 npm）：
+**推荐：从 DSH 插件市场安装**，之后升级只需点一下按钮。
+
+在「插件市场 → 索引源」里添加这个地址：
+
+```
+https://raw.githubusercontent.com/fishingninja/ds-harness-notice-QQlike/main/market/index.json
+```
+
+然后搜索 `桌面提醒` 或 `dsh-desktop-alerts`，点安装即可。市场会自动读取你已装的版本，有新版本时那一行会变成「更新」，点一下就升级。
+
+**或者直接用 Git 安装**（不配置索引源）：
 
 ```powershell
 # 在你运行 DSH 所用的 profile 里
-dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
+dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git#main&path:/packages/dsh-desktop-alerts"
 ```
 
-或者从源码目录安装（开发时用这个，改完源码重新启用即可生效）：
+注意 `path:` 指向子目录：这个仓库是 monorepo，插件本体在 `packages/dsh-desktop-alerts`。
+
+**从源码目录安装**（开发时用这个，改完源码重新启用即可生效）：
 
 ```js
-plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike" })
+plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike\\packages\\dsh-desktop-alerts" })
 ```
 
 插件只插入一个宿主条目和一个客户端模块，装好即用，无需额外配置。
@@ -51,6 +63,21 @@ plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-not
 
 正常完成（`completed` / `forked`）永远算「完成」，不会被误判成中断：
 这个事实来自宿主端的 `turn/end` 事件，而不是页面上的猜测。
+
+## 更新
+
+这个插件走 DSH 插件市场，升级是市场自带的能力，不需要插件自己实现：
+
+1. 维护者在 `market/index.json` 里追加一个新版本条目（新的 `version` +
+   `publishTimestamp` + 指向新 commit 的 `source`），推到 GitHub。
+2. 你打开插件市场，那一行会从「已安装」变成「更新」—— 市场用已装包的
+   `package.json` 里的 `version` 与索引里的版本做比较，判定逻辑是
+   `update-available`。
+3. 点「更新」即可，市场会把该版本对应的 git commit 装上来。
+
+因为索引是纯静态 JSON，GitHub 的 raw 地址天然带 CDN 缓存，所以**不需要**
+任何服务器。发布新版本时唯一要记得的是：**先 push 代码，拿到新的 40 位
+commit，再更新索引**，否则市场装到的还是旧代码。
 
 ## 为什么闪动是「叠加层」
 

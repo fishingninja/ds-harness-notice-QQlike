@@ -18,18 +18,33 @@ window does:
 
 ## Install
 
-Not yet published to npm, so install from Git:
+**Recommended: install from the DSH plugin market**, so later upgrades are one click.
+
+Add this URL as an index source under *Plugin market → Index sources*:
+
+```
+https://raw.githubusercontent.com/fishingninja/ds-harness-notice-QQlike/main/market/index.json
+```
+
+Then search for `Desktop alerts` or `dsh-desktop-alerts` and press Install. The
+market reads the version you already have, and once a newer one is published
+that row turns into an Update button.
+
+**Or install straight from Git** (no index source needed):
 
 ```powershell
 # inside the profile you run DSH with
-dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
+dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git#main&path:/packages/dsh-desktop-alerts"
 ```
+
+Note the `path:` — this repository is a monorepo and the package itself lives in
+`packages/dsh-desktop-alerts`.
 
 Or from a checkout, point `plugin_manager` at the package directory (handy while
 developing: re-enable the plugin after an edit and the change takes effect):
 
 ```js
-plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike" })
+plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike\\packages\\dsh-desktop-alerts" })
 ```
 
 The bundle inserts one Host row and one Client half. Nothing needs configuring
@@ -57,6 +72,24 @@ before it works.
 Normal completion (`completed` / `forked`) is always "finished"; it never counts
 as an interruption. The distinction comes from the host's `turn/end` event, not
 from guessing on the page.
+
+## Updating
+
+Upgrades are the plugin market's own feature, so this plugin does not implement
+its own updater:
+
+1. The maintainer appends a new version entry to `market/index.json` (a new
+   `version`, a `publishTimestamp`, and a `source` pinned to the new commit)
+   and pushes it.
+2. The market compares that against the `version` in the installed package's
+   `package.json` and reports `update-available`, which the UI shows as an
+   Update button.
+3. Pressing it installs the commit that entry names.
+
+The index is a static JSON file on GitHub's raw endpoint, so there is no server
+to run. The one thing to remember when releasing: **push the code first, take
+the new 40-hex commit, then update the index** — otherwise the market installs
+the old code.
 
 ## Why the blink is an overlay
 

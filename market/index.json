@@ -91,7 +91,8 @@
           "source": {
             "type": "git",
             "url": "https://github.com/fishingninja/ds-harness-notice-QQlike",
-            "commit": "aac0e0c52ea3f96cd9749b7db63812e11824711e"
+            "commit": "aac0e0c52ea3f96cd9749b7db63812e11824711e",
+            "path": "packages/dsh-desktop-alerts"
           },
           "engines": {
             "dsh": ">=0.2.1-rc.2"

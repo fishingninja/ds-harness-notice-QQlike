@@ -1161,24 +1161,49 @@
         ".dda-diag{display:flex;flex-direction:column;gap:4px;padding:10px 14px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,rgba(90,90,90,.9))}" +
         ".dda-diag b{color:var(--dsw-alias-label-primary,rgba(20,20,20,.9));font-weight:600}";
 
+      // ─────────────────────── native session list dot ───────────────────────
+      // ui-workspace draws the per-session state dot through the shared
+      // `StateDot` primitive. Its own stylesheet puts the painted circle at
+      // `inset:20%` of a 10px box (`size ?? (state === "ongoing" ? 14 : 10)`),
+      // so a done/warning dot is only 6px across and reads as a speck.
+      //
+      // The primitive's class name carries a build hash (`_dot_1i3xo_2`), which
+      // changes between releases, so the override matches on the stable parts:
+      // the `_dot_` prefix, the `data-state` values, and the painted box being
+      // the element's ::after. `!important` is required because the primitive
+      // also sets `width`/`height` inline for its spinner appearance; the rule
+      // below only targets the dot (span) variant, never the ongoing spinner.
+      var DOT_CSS =
+        "._dot_1i3xo_2:after,span[class*='_dot_']:after{inset:6% !important}" +
+        "span[class*='_dot_'][data-state]{min-width:14px;min-height:14px}";
+
       function injectStyle() {
-        var el = null;
+        var els = [];
         try {
           if (typeof document === "undefined" || typeof document.createElement !== "function") return function () {};
-          var tagId = "dsh-desktop-alerts/ui";
-          if (document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]")) return function () {};
-          el = document.createElement("style");
-          el.dataset.plugin = "dsh-desktop-alerts";
-          el.dataset.pluginCss = tagId;
-          el.textContent = UI_CSS;
-          (document.head || document.documentElement).appendChild(el);
+          var parts = [
+            { id: "dsh-desktop-alerts/ui", text: UI_CSS },
+            { id: "dsh-desktop-alerts/session-dot", text: DOT_CSS },
+          ];
+          for (var i = 0; i < parts.length; i++) {
+            var tagId = parts[i].id;
+            if (document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]")) continue;
+            var el = document.createElement("style");
+            el.dataset.plugin = "dsh-desktop-alerts";
+            el.dataset.pluginCss = tagId;
+            el.textContent = parts[i].text;
+            (document.head || document.documentElement).appendChild(el);
+            els.push(el);
+          }
         } catch (e) {
-          el = null;
+          els = [];
         }
         return function () {
-          try {
-            if (el && el.parentNode) el.parentNode.removeChild(el);
-          } catch (e) {}
+          for (var i = 0; i < els.length; i++) {
+            try {
+              if (els[i] && els[i].parentNode) els[i].parentNode.removeChild(els[i]);
+            } catch (e) {}
+          }
         };
       }
 
@@ -1570,7 +1595,7 @@
       // ─────────────────────── public control API ───────────────────────
       var api = root.__dshDesktopAlerts;
       if (!api || typeof api !== "object") api = {};
-      api.version = "1.0.0";
+      api.version = "1.1.0";
       api.getConfig = function () {
         return readConfig();
       };
