@@ -1,0 +1,103 @@
+{
+  "format": 1,
+  "title": {
+    "en": "DSH desktop notices",
+    "zh": "DSH 桌面提醒"
+  },
+  "description": {
+    "en": "Plugins that bring QQ-style attention cues to the DeepSeek Harness desktop client.",
+    "zh": "给 DeepSeek Harness 桌面端带来 QQ 风格提醒的插件。"
+  },
+  "metadata": {
+    "categories": {
+      "notifications": {
+        "title": {
+          "en": "Notifications",
+          "zh": "提醒"
+        }
+      }
+    },
+    "labels": {
+      "windows": {
+        "title": {
+          "en": "Windows",
+          "zh": "Windows"
+        }
+      },
+      "tray": {
+        "title": {
+          "en": "Tray",
+          "zh": "系统托盘"
+        }
+      },
+      "sound": {
+        "title": {
+          "en": "Sound",
+          "zh": "声音"
+        }
+      }
+    },
+    "sortKeys": {
+      "published": {
+        "title": {
+          "en": "Published",
+          "zh": "发布时间"
+        },
+        "order": "desc"
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-desktop-alerts",
+      "title": {
+        "en": "Desktop alerts",
+        "zh": "桌面提醒"
+      },
+      "description": {
+        "en": "QQ-style attention alerts: one short cue, a notification-area icon that blinks like an unread message, and an unread dock. The blink stops only when every triggering session has been read.",
+        "zh": "QQ 风格的桌面提醒：一个短促提示音，系统托盘图标像未读消息一样闪动，右下角还有未读浮窗。只有把所有触发提醒的会话都读掉之后才停止闪动。"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkRlc2t0b3AgYWxlcnRzIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM1YjljZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMmY2ZmU0Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iNDQiIGhlaWdodD0iNDQiIHJ4PSIxMSIgZmlsbD0idXJsKCNnKSIvPgogIDxwYXRoIGQ9Ik0yNCAxMGE4LjUgOC41IDAgMCAwLTguNSA4LjV2Ni42bC0yLjYgNS4yQTEuNiAxLjYgMCAwIDAgMTQuNCAzM2gxOS4yYTEuNiAxLjYgMCAwIDAgMS41LTIuN0wzMi41IDI1LjF2LTYuNkE4LjUgOC41IDAgMCAwIDI0IDEwWiIgZmlsbD0iI2ZmZiIvPgogIDxjaXJjbGUgY3g9IjI0IiBjeT0iMzYuNiIgcj0iMy40IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzUuNSIgY3k9IjEyLjUiIHI9IjUuNSIgZmlsbD0iI2ZmNWE1MiIvPgogIDxjaXJjbGUgY3g9IjM1LjUiIGN5PSIxMi41IiByPSIyLjIiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==",
+      "author": "fishingninja",
+      "homepage": "https://github.com/fishingninja/ds-harness-notice-QQlike#readme",
+      "repository": {
+        "url": "https://github.com/fishingninja/ds-harness-notice-QQlike"
+      },
+      "metadata": {
+        "category": "notifications",
+        "keywords": [
+          "alerts",
+          "tray",
+          "notification",
+          "sound",
+          "unread",
+          "qq",
+          "windows"
+        ],
+        "labels": [
+          "windows",
+          "tray",
+          "sound"
+        ],
+        "sortKeys": {
+          "published": 1793983255
+        }
+      },
+      "versions": [
+        {
+          "version": "1.1.0",
+          "publishTimestamp": 1793983255,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/fishingninja/ds-harness-notice-QQlike",
+            "commit": "aac0e0c52ea3f96cd9749b7db63812e11824711e"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.2"
+          }
+        }
+      ]
+    }
+  ]
+}
