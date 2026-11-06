@@ -18,15 +18,18 @@ window does:
 
 ## Install
 
+Not yet published to npm, so install from Git:
+
 ```powershell
 # inside the profile you run DSH with
-dsh plugin install dsh-desktop-alerts
+dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
 ```
 
-Or from a checkout, point `plugin_manager` at the package directory:
+Or from a checkout, point `plugin_manager` at the package directory (handy while
+developing: re-enable the plugin after an edit and the change takes effect):
 
 ```js
-plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\dsh-desktop-alerts" })
+plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike" })
 ```
 
 The bundle inserts one Host row and one Client half. Nothing needs configuring

@@ -3,15 +3,15 @@
   "version": "1.1.0",
   "description": "QQ 风格的 DSH 桌面提醒：会话需要你处理、回复完成或被中断时响一声，并让系统托盘图标像未读消息一样闪动。",
   "license": "MIT",
-  "author": "fishingninja_h",
+  "author": "fishingninja",
   "type": "module",
-  "homepage": "https://github.com/fishingninja-h/dsh-desktop-alerts#readme",
+  "homepage": "https://github.com/fishingninja/ds-harness-notice-QQlike#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fishingninja-h/dsh-desktop-alerts.git"
+    "url": "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
   },
   "bugs": {
-    "url": "https://github.com/fishingninja-h/dsh-desktop-alerts/issues"
+    "url": "https://github.com/fishingninja/ds-harness-notice-QQlike/issues"
   },
   "keywords": [
     "deepseek-harness",

@@ -15,15 +15,17 @@ QQ 风格的 DSH 桌面提醒插件（Windows 桌面端）。
 
 ## 安装
 
+目前通过 Git 安装（尚未发布到 npm）：
+
 ```powershell
 # 在你运行 DSH 所用的 profile 里
-dsh plugin install dsh-desktop-alerts
+dsh plugin install "git+https://github.com/fishingninja/ds-harness-notice-QQlike.git"
 ```
 
-或者从源码目录安装：
+或者从源码目录安装（开发时用这个，改完源码重新启用即可生效）：
 
 ```js
-plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\dsh-desktop-alerts" })
+plugin_manager({ action: "install_bundle", target: "E:\\path\\to\\ds-harness-notice-QQlike" })
 ```
 
 插件只插入一个宿主条目和一个客户端模块，装好即用，无需额外配置。
