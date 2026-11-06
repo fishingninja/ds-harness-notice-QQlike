@@ -1,0 +1,11 @@
+# Build output and local scratch
+node_modules/
+*.log
+.tmp-market/
+
+# Editor and OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.swp

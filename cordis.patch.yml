@@ -1,0 +1,11 @@
+- insert:
+    - id: desktop-alerts
+      name: dsh-desktop-alerts
+      config:
+        sound:
+          enabled: true
+          volume: 0.55
+        flash: true
+        badge: true
+        ignoreSubagents: true
+        skipVisibleCurrent: true
