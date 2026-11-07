@@ -81,7 +81,7 @@
           "sound"
         ],
         "sortKeys": {
-          "published": 1793983255
+          "published": 1794027838
         }
       },
       "versions": [
@@ -92,6 +92,19 @@
             "type": "git",
             "url": "https://github.com/fishingninja/ds-harness-notice-QQlike",
             "commit": "6f3b3b838097455499ebe55ff1aab072ef18d711",
+            "path": "packages/dsh-desktop-alerts"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.2"
+          }
+        },
+        {
+          "version": "1.1.1",
+          "publishTimestamp": 1794027838,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/fishingninja/ds-harness-notice-QQlike",
+            "commit": "8c9c4dd64106b8b4ace73d4d2a2de632d875ed14",
             "path": "packages/dsh-desktop-alerts"
           },
           "engines": {
