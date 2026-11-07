@@ -1595,7 +1595,7 @@
       // ─────────────────────── public control API ───────────────────────
       var api = root.__dshDesktopAlerts;
       if (!api || typeof api !== "object") api = {};
-      api.version = "1.1.0";
+      api.version = "1.1.1";
       api.getConfig = function () {
         return readConfig();
       };
@@ -1763,6 +1763,37 @@
               });
             } catch (e) {}
 
+            // A reload must not orphan a running blink: the disposer below only
+            // runs when cordis unloads the plugin, not when the page navigates,
+            // and the overlay loop clears itself only when its owner asks. Tell
+            // the host on the way out, so the next page starts from a clean
+            // tray instead of inheriting a blink nothing owns.
+            var onPageHide = function () {
+              if (!flashing) return;
+              flashing = false;
+              try {
+                // `keepalive` lets the request outlive the unload; a plain
+                // fetch is cancelled with the page and the blink would be
+                // orphaned. sendBeacon cannot be used here: it cannot set the
+                // custom header the route requires.
+                root.fetch(FLASH_ROUTE, {
+                  method: "POST",
+                  headers: FLASH_HEADERS,
+                  body: JSON.stringify({ action: "stop" }),
+                  cache: "no-store",
+                  keepalive: true,
+                });
+              } catch (e) {}
+            };
+            try {
+              root.addEventListener("pagehide", onPageHide);
+              unsubs.push(function () {
+                try {
+                  root.removeEventListener("pagehide", onPageHide);
+                } catch (e) {}
+              });
+            } catch (e) {}
+
             // A browser only starts an AudioContext after a user gesture.
             var onGesture = function () {
               unlockAudio();
@@ -1781,6 +1812,15 @@
             bindInteractionSource();
             probeDesktop();
             sync();
+            // A previous instance can leave the tray overlay blinking: a loop
+            // only clears the overlay when *its own* `flashing` flag is set, so
+            // a reload that drops the instance without running its disposer
+            // orphans a live blink that no instance owns any more. The symptom
+            // is a tray that blinks while the unread set is empty, which reads
+            // exactly like a false alarm. Clear it once on mount; the sync()
+            // above has already re-armed a blink if one is genuinely due, so
+            // this cannot silence a real reminder.
+            if (!flashing) postFlash("stop");
             // The uiSession entry may apply after this one, and the service
             // instance is replaced on HMR: re-check while idle.
             retryTimer = setInterval(function () {
