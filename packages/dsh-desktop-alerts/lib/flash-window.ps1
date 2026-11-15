@@ -124,21 +124,54 @@ public class TrayQuery {
     return Shell_NotifyIconGetRect(ref d, out r) == 0;
   }
 
+  // Process image name, lowercased, or "" when the process cannot be opened.
+  static string NameOf(uint pid) {
+    try {
+      using (System.Diagnostics.Process p = System.Diagnostics.Process.GetProcessById((int)pid)) {
+        return p.ProcessName.ToLowerInvariant();
+      }
+    } catch { return ""; }
+  }
+
   // Locate one tray icon. Returns the owning hwnd, its id and its screen rect.
+  //
+  // When wantPid is 0 the caller wants "this app's" icon, but EnumWindows order
+  // is not stable and every Electron app on the machine publishes a host window
+  // of the same class. Picking the first one therefore covers whichever tray
+  // icon happened to enumerate first - on a machine running several Electron
+  // apps that is a coin flip, and the blink lands on a neighbour's icon or on
+  // empty space. Prefer a host whose process name looks like this app, and fall
+  // back to the first host only when nothing matches.
   public static string Locate(uint wantPid, out IntPtr foundHwnd, out uint foundUid,
                               out int x, out int y, out int w, out int h) {
     foundHwnd = IntPtr.Zero; foundUid = 0; x = y = w = h = 0;
     List<IntPtr> hosts = Hosts();
-    foreach (IntPtr host in hosts) {
+    if (hosts.Count == 0) return "";
+
+    List<IntPtr> ordered = new List<IntPtr>();
+    if (wantPid != 0) {
+      foreach (IntPtr host in hosts) {
+        if (PidOf(host) == wantPid) ordered.Add(host);
+      }
+    } else {
+      // Two passes: self-identifying hosts first, then everything else.
+      foreach (IntPtr host in hosts) {
+        if (NameOf(PidOf(host)).IndexOf("deepseek") >= 0) ordered.Add(host);
+      }
+      foreach (IntPtr host in hosts) {
+        if (!ordered.Contains(host)) ordered.Add(host);
+      }
+    }
+
+    foreach (IntPtr host in ordered) {
       uint pid = PidOf(host);
-      if (wantPid != 0 && pid != wantPid) continue;
       for (uint uid = 1; uid <= 16; uid++) {
         IconRect r;
         if (RectOf(host, uid, out r)) {
           foundHwnd = host; foundUid = uid;
           x = r.Left; y = r.Top;
           w = r.Right - r.Left; h = r.Bottom - r.Top;
-          return "pid=" + pid + " hwnd=" + host + " uid=" + uid;
+          return "pid=" + pid + " hwnd=" + host + " uid=" + uid + " name=" + NameOf(pid);
         }
       }
     }
@@ -242,6 +275,20 @@ public class TrayOverlay : Form {
     ShowWindow(Handle, SW_SHOW);
     SetWindowPos(Handle, HWND_TOPMOST, Left, Top, Width, Height,
                  SWP_SHOWWINDOW | SWP_NOACTIVATE);
+  }
+
+  // Follow the tray icon when Windows moves it.
+  //
+  // Notification cells shift whenever another app adds or removes an icon, and
+  // Explorer also re-flows them when a window is shown or hidden. An overlay
+  // created once therefore drifts off the icon it is meant to mark - it keeps
+  // blinking at a stale rectangle, which looks exactly like "the tray never
+  // blinked at all" because nothing visible is changing where the user looks.
+  public void MoveTo(int x, int y, int w, int h) {
+    if (x == Left && y == Top && w == _w && h == _h) return;
+    _w = w; _h = h;
+    Bounds = new Rectangle(x, y, w, h);
+    SetWindowPos(Handle, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE);
   }
 
   public bool IsShown() { return IsWindowVisible(Handle); }
@@ -448,14 +495,63 @@ function Write-State($obj) {
     Set-Content -LiteralPath $statePath -Value $json -Encoding ASCII
 }
 
+function Get-LoopProcesses {
+    # Every powershell running this script's blink loop.
+    #
+    # The loop is spawned with -EncodedCommand, so its command line is base64
+    # and contains neither "flash-window" nor "-Action loop" in clear text:
+    # matching on the visible text finds nothing and silently disables cleanup.
+    # Decoding the encoded payload is what actually identifies these processes.
+    $found = @()
+    try {
+        $all = Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue
+    } catch { return $found }
+
+    foreach ($p in $all) {
+        if ($p.ProcessId -eq $PID) { continue }
+        $cl = $p.CommandLine
+        if ($null -eq $cl) { continue }
+
+        $isLoop = $false
+        if ($cl -match '-EncodedCommand\s+(\S+)') {
+            try {
+                $decoded = [Text.Encoding]::Unicode.GetString(
+                    [Convert]::FromBase64String($matches[1]))
+                if ($decoded -match 'flash-window' -and $decoded -match '-Action\s+loop') {
+                    $isLoop = $true
+                }
+            } catch { }
+        } elseif ($cl -match 'flash-window' -and $cl -match '-Action\s+loop') {
+            $isLoop = $true
+        }
+
+        if ($isLoop) { $found += $p.ProcessId }
+    }
+    return $found
+}
+
 function Stop-Existing {
+    # Stop every loop this script ever spawned, not just the one the state file
+    # names. The state file is a single slot: a loop that lost the race for it -
+    # or one orphaned by a page reload that never sent `stop` - keeps painting
+    # its own overlay with nothing pointing at it. Two live loops alternate
+    # frames against each other, so the icon looks stuck or barely flickers.
+    $swept = 0
+    foreach ($id in (Get-LoopProcesses)) {
+        Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+        $swept++
+    }
+    if ($swept -gt 0) { Start-Sleep -Milliseconds 350 }
+
     $prev = Read-State
-    if ($null -eq $prev) { return $false }
-    if ($null -eq $prev.pid) { return $false }
+    if ($null -eq $prev) {
+        return ($swept -gt 0)
+    }
+    if ($null -eq $prev.pid) { return ($swept -gt 0) }
     $proc = Get-Process -Id ([int]$prev.pid) -ErrorAction SilentlyContinue
     if ($null -eq $proc) {
         Remove-Item -LiteralPath $statePath -ErrorAction SilentlyContinue
-        return $false
+        return ($swept -gt 0)
     }
 
     # Delete the state file first: a running loop polls it every 50ms and exits
@@ -632,6 +728,14 @@ $cleanup = {
 
 try {
     $on = $true
+    # How often to re-measure the tray cell. The cell moves when another app
+    # adds or removes a notification icon, so a blink pinned to the rectangle
+    # measured at start can end up covering empty taskbar - visible as "no
+    # blink at all". Re-measuring is cheap (one shell call) next to a 600ms
+    # frame interval.
+    $relocateEveryMs = 1000
+    $sinceRelocate = $relocateEveryMs
+
     while ($script:Running) {
         if ($on) { $overlay.ShowFrame($alertFrame) } else { $overlay.ShowFrame($clearFrame) }
         $on = -not $on
@@ -643,8 +747,23 @@ try {
             Start-Sleep -Milliseconds 50
             [System.Windows.Forms.Application]::DoEvents()
             $slept += 50
+            $sinceRelocate += 50
             $st = Read-State
-            if ($null -eq $st) { $script:Running = $false }
+            if ($null -eq $st) { $script:Running = $false; break }
+
+            if ($sinceRelocate -ge $relocateEveryMs) {
+                $sinceRelocate = 0
+                # Re-resolve the same icon we started on. A failure is not fatal:
+                # the icon may be mid-move, and the next tick retries.
+                try {
+                    $h2 = [IntPtr]::Zero
+                    $u2 = 0
+                    $nx = 0; $ny = 0; $nw = 0; $nh = 0
+                    $r2 = [TrayQuery]::Locate([uint32]$TargetPid, [ref]$h2, [ref]$u2,
+                                              [ref]$nx, [ref]$ny, [ref]$nw, [ref]$nh)
+                    if ($r2 -ne '') { $overlay.MoveTo($nx, $ny, $nw, $nh) }
+                } catch { }
+            }
         }
     }
 } finally {
