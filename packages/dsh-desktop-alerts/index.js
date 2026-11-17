@@ -205,14 +205,22 @@ function flashScriptPath(config) {
 
 /**
  * @param config - normalized config.
- * @returns the pid whose window is flashed: the configured pid, the env
- *   override, or the Electron main process (this host's parent).
+ * @returns the pid whose tray icon is flashed, or 0 to let the helper find it.
+ *
+ * Do NOT fall back to process.ppid here. This plugin runs inside a DSH
+ * subprocess (dsh-subprocess-local/runner.js), and each session spawns its own
+ * runner under a different DeepSeek Harness.exe parent. Only ONE of those
+ * parents actually owns the Electron tray icon; process.ppid points at whoever
+ * happened to launch this particular runner, so the helper either fails to
+ * find an icon for it or - worse - blinks some other app's icon and keeps
+ * following it on re-locate. Passing 0 asks the helper to prefer a host whose
+ * process name is "deepseek", which is the only stable signal we have.
  */
 function flashTargetPid(config) {
   const env = Number(process.env.DSH_DESKTOP_ALERTS_PID);
   if (Number.isFinite(env) && env > 0) return Math.trunc(env);
   if (config.targetPid > 0) return config.targetPid;
-  return Number.isFinite(process.ppid) ? process.ppid : 0;
+  return 0;
 }
 
 /**

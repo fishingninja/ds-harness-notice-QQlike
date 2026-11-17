@@ -148,20 +148,27 @@ public class TrayQuery {
     List<IntPtr> hosts = Hosts();
     if (hosts.Count == 0) return "";
 
-    List<IntPtr> ordered = new List<IntPtr>();
-    if (wantPid != 0) {
-      foreach (IntPtr host in hosts) {
-        if (PidOf(host) == wantPid) ordered.Add(host);
-      }
-    } else {
-      // Two passes: self-identifying hosts first, then everything else.
-      foreach (IntPtr host in hosts) {
-        if (NameOf(PidOf(host)).IndexOf("deepseek") >= 0) ordered.Add(host);
-      }
-      foreach (IntPtr host in hosts) {
-        if (!ordered.Contains(host)) ordered.Add(host);
-      }
+    // Rank candidate hosts. A caller-supplied pid is only a hint: this plugin
+    // used to pass process.ppid, which is whichever DSH subprocess spawned the
+    // plugin - NOT necessarily the process that owns the tray icon. Trusting it
+    // blindly made the blink land on another app's icon. A host whose process
+    // name is "deepseek" is the strongest signal, so it always wins; an exact
+    // pid match is next; the rest are a last resort.
+    List<IntPtr> self = new List<IntPtr>();
+    List<IntPtr> byPid = new List<IntPtr>();
+    List<IntPtr> rest = new List<IntPtr>();
+    foreach (IntPtr host in hosts) {
+      uint pid = PidOf(host);
+      string name = NameOf(pid);
+      if (name.IndexOf("deepseek") >= 0) self.Add(host);
+      else if (wantPid != 0 && pid == wantPid) byPid.Add(host);
+      else rest.Add(host);
     }
+    // Self-identifying first, then an exact caller match, then anything else.
+    List<IntPtr> ordered = new List<IntPtr>();
+    foreach (IntPtr cand in self) if (!ordered.Contains(cand)) ordered.Add(cand);
+    foreach (IntPtr cand in byPid) if (!ordered.Contains(cand)) ordered.Add(cand);
+    foreach (IntPtr cand in rest) if (!ordered.Contains(cand)) ordered.Add(cand);
 
     foreach (IntPtr host in ordered) {
       uint pid = PidOf(host);

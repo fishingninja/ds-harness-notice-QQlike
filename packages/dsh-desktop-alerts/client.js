@@ -1595,7 +1595,7 @@
       // ─────────────────────── public control API ───────────────────────
       var api = root.__dshDesktopAlerts;
       if (!api || typeof api !== "object") api = {};
-      api.version = "1.1.2";
+      api.version = "1.1.3";
       api.getConfig = function () {
         return readConfig();
       };
